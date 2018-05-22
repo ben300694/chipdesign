@@ -40,18 +40,28 @@ std::vector<long> get_y_coordinates(const std::vector<std::vector<long>> &list_o
     return y_coordinates;
 }
 
-long clique_netlength(const std::vector<std::vector<long>> &list_of_points){
+double clique_netlength(const std::vector<std::vector<long>> &list_of_points){
+
     long clique_netlength = 0;
 
     std::vector<long> x_coordinates = get_x_coordinates(list_of_points);
     std::vector<long> y_coordinates = get_y_coordinates(list_of_points);
+    // Sort coordinates independently
     std::sort(x_coordinates.begin(), x_coordinates.end());
     std::sort(y_coordinates.begin(), y_coordinates.end());
-    std::cout << "x_coordinates sorted:" << x_coordinates << std::endl;
-    std::cout << "y_coordinates sorted:" << y_coordinates << std::endl;
+    // std::cout << "x_coordinates sorted:" << x_coordinates << std::endl;
+    // std::cout << "y_coordinates sorted:" << y_coordinates << std::endl;
 
+    // The first segment is counted (n-1)-times
+    // the second segment is counted (n-2)-times
+    // ...
+    // the last segment is counted 1 time
+    for(size_t i = 1; i < x_coordinates.size(); i++){
+        clique_netlength += (x_coordinates.size() - i)*(x_coordinates[i] - x_coordinates[i-1]);
+        clique_netlength += (y_coordinates.size() - i)*(y_coordinates[i] - y_coordinates[i-1]);
+    }
 
-    return clique_netlength;
+    return clique_netlength/(double)(list_of_points.size() - 1);
 }
 
 long bounding_box(const std::vector<std::vector <long>> listofpoints){
@@ -60,6 +70,7 @@ long bounding_box(const std::vector<std::vector <long>> listofpoints){
     long ymin=listofpoints[0][1];
     long ymax=listofpoints[0][1];
 
+    // Find minimum and maximum
     for(auto point: listofpoints){
         if (point[0]<xmin){
             xmin=point[0];
@@ -82,6 +93,7 @@ long bounding_box(const std::vector<std::vector <long>> listofpoints){
 
 int main(int argc, char** argv) {
 
+    // Read in coordinates from STDIN
     std::vector<std::vector<long>> list_of_points;
 
     while (!std::cin.eof()) {
@@ -108,8 +120,9 @@ int main(int argc, char** argv) {
     std::cout << "Read in the following coordinates" << std::endl;
     std::cout << list_of_points << std::endl;
 
+    // Calculate results
     long bounding_box_netlength = bounding_box(list_of_points);
-    long clique_length = clique_netlength(list_of_points);
+    double clique_length = clique_netlength(list_of_points);
 
     std::cout << "Bounding box: " << bounding_box_netlength << std::endl;
     std::cout << "Clique: " << clique_length << std::endl;
