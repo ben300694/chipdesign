@@ -30,4 +30,4 @@ add_executable(chipdesign
         SteinerInstances/vlsi90.txt
         SteinerInstances/vlsi900.txt
         LICENSE
-        README.md)
+        README.md main.cpp)
