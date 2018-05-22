@@ -97,6 +97,7 @@ double clique_netlength(const std::vector<std::vector<long>> &list_of_points){
 
 long star_netlength(const std::vector<std::vector<long>> &list_of_points){
 
+    // Can deal with x- and y-direction separately
     long star_netlength = 0;
     long starx;
     long stary;
@@ -106,10 +107,14 @@ long star_netlength(const std::vector<std::vector<long>> &list_of_points){
     // Sort coordinates independently
     std::sort(x_coordinates.begin(), x_coordinates.end());
     std::sort(y_coordinates.begin(), y_coordinates.end());
+
+    // Mean index is the point with the lowest total distance to
+    // all other point
     size_t l=(list_of_points.size()-1)/2;
     starx = x_coordinates[l];
     stary = y_coordinates[l];
 
+    // Add distances to the star point
     for(size_t i = 0; i < x_coordinates.size(); i++){
         star_netlength += labs(starx - x_coordinates[i]);
         star_netlength += labs(stary - y_coordinates[i]);
@@ -121,7 +126,7 @@ long star_netlength(const std::vector<std::vector<long>> &list_of_points){
 
 
 int main(int argc, char** argv) {
-    //does main stuff
+    // does main stuff
     // Read in coordinates from STDIN
     std::vector<std::vector<long>> list_of_points;
 
@@ -130,8 +135,8 @@ int main(int argc, char** argv) {
         std::getline(std::cin, line);
 
         if (std::cin.fail()) {
-            //error
-            std::cout << "An error occured while reading in" << std::endl;
+            // Error or EOF
+            //std::cout << "An error occured while reading in" << std::endl;
             break;
         }
 
@@ -153,10 +158,14 @@ int main(int argc, char** argv) {
     long bounding_box_netlength = bounding_box(list_of_points);
     double clique_length = clique_netlength(list_of_points);
     long star_length = star_netlength(list_of_points);
+    long MST = -1; //TODO
+    long algorithm = -1; //TODO
 
     std::cout << "Bounding box: " << bounding_box_netlength << std::endl;
     std::cout << "Clique: " << clique_length << std::endl;
     std::cout << "Star: " << star_length << std::endl;
+    std::cout << "MST: " << MST << std::endl;
+    std::cout << "Algorithm: " << algorithm << std::endl;
 
     return 0;
 
