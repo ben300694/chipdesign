@@ -54,7 +54,6 @@ long clique_netlength(const std::vector<std::vector<long>> &list_of_points){
     return clique_netlength;
 }
 
-int main(int argc, char **argv) {
 long bounding_box(const std::vector<std::vector <long>> listofpoints){
     long xmin=listofpoints[0][0];
     long xmax=listofpoints[0][0];
@@ -109,8 +108,11 @@ int main(int argc, char** argv) {
     std::cout << "Read in the following coordinates" << std::endl;
     std::cout << list_of_points << std::endl;
 
-    long bounding_box_netlength = 0; //TODO
+    long bounding_box_netlength = bounding_box(list_of_points);
     long clique_length = clique_netlength(list_of_points);
+
+    std::cout << "Bounding box: " << bounding_box_netlength << std::endl;
+    std::cout << "Clique: " << clique_length << std::endl;
 
     return 0;
 
