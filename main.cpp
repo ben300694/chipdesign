@@ -62,16 +62,16 @@ long bounding_box(const std::vector<std::vector <long>> listofpoints){
 
     for(auto point: listofpoints){
         if (point[0]<xmin){
-          xmin=point[0];
+            xmin=point[0];
         }
         if (point[0]>xmax){
             xmax=point[0];
         }
         if (point[1]>ymax){
-            ymax=point[0];
+            ymax=point[1];
         }
         if (point[0]<ymin){
-            ymin=point[0];
+            ymin=point[1];
         }
     }
     long length = xmax-xmin+ymax-ymin;
