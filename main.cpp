@@ -171,7 +171,7 @@ long MST_length(const std::vector<std::vector<long>> &list_of_points) {
     key[0] = 0;
 
     // Need num_vertices-1 steps to construct a spanning tree
-    for (int k = 0; k <= num_vertices - 1; k++) {
+    for (size_t k = 0; k <= num_vertices - 1; k++) {
         // Get vertex not included in tree with shortest distance
         size_t min_position = get_min_index(key, included_in_MST);
         //std::cout << "min_position: " << min_position << std::endl;
@@ -199,16 +199,20 @@ long MST_length(const std::vector<std::vector<long>> &list_of_points) {
     return MST_len;
 }
 
-long algorithm_length(const std::vector<std::vector<long>> &list_of_points) {
-    //TODO
-    return -1;
-}
+//long algorithm_length(const std::vector<std::vector<long>> &list_of_points) {
+//    //TODO
+//    return -1;
+//}
 
 // --------------------------------------------------
 // main
 // --------------------------------------------------
 
-int main(int argc, char **argv) {
+int main(int argc, char* argv[]) {
+    // To silence the compiler warning about unused variables
+    (void)argc;
+    (void)argv;
+
     // does main stuff
     // Read in coordinates from STDIN
     std::vector<std::vector<long>> list_of_points;
@@ -243,7 +247,8 @@ int main(int argc, char **argv) {
     double clique_len = clique_netlength(list_of_points);
     long star_len = star_netlength(list_of_points);
     long MST_len = MST_length(list_of_points);
-    long algorithm_len = algorithm_length(list_of_points); //TODO
+//    long algorithm_len = algorithm_length(list_of_points); //TODO
+    long algorithm_len = -1;
 
     std::cout << "Bounding box: " << bounding_box_len << std::endl;
     std::cout << "Clique: " << clique_len << std::endl;
