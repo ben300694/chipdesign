@@ -5,6 +5,4 @@ set(CMAKE_CXX_STANDARD 11)
 
 include_directories(sheet_02/lp_solver)
 
-add_custom_target(msscxx COMMAND make msscxx)
-
-add_executable(mss.c)
+add_custom_target(msscxx.C)
