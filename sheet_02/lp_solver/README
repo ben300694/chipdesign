@@ -1,0 +1,61 @@
+2nd programming exercise, Chip Design 2018
+
+This C-code is intended to show the usage of the API in lp.h.
+It also contains a routine to read in a dimacs graph.
+You can build upon the code to implement the second
+programming exercise.
+
+It can be used under Linux, Windows, and several other
+UNIX-systems (e.g. OS-X).
+
+The main file is mss.c. It contains a routine for loading graphs in
+DIMACS format and provides  examples for:
+-  creating an LP (for a different exercise),
+-  solving it, and 
+-  retrieving the solution.
+
+Under Linux or Windows/Cygwin you can simply compile by typing 'make'
+in this directory.
+
+
+
+
+
+
+
+   Compiling with C++
+
+If you want to use C++, you can comple with g++, typing  'make msscxx'. 
+Note that from C++ you have to include C headers from within a
+'extern "C"' block (see mss.c)
+
+
+
+    Adding New Files
+
+The files dummy.c dummycxx.C indicate how further .c or .C files can be added
+to the Makefile. They are empty and currently have no function.
+
+
+
+    LP-solver
+
+The LP-solver is accessed through the interface in lp.h.
+The important functions (most importantly LINGOlp_addrow and LINGOlp_x) 
+in lp.h are documented.
+
+There are implementations of lp.h for the two major commercial solvers
+CPLEX (lpcplex.c) and Gurobi (lpgurobi.c), as well as QSopt (lpqsopt.c).
+All three solvers are freely available (only) for academic purposes.
+See:
+http://www-01.ibm.com/support/docview.wss?uid=swg21419058,
+http://www.gurobi.com/html/academic.html respectively, and
+http://www2.isye.gatech.edu/~wcook/qsopt/index.html.
+
+
+By default QSopt is used, as it is the easiest to install.
+The files qsopt.h, qsopt.a.linux, and qsopt.a.cygwin were
+downloaded from http://www2.isye.gatech.edu/~wcook/qsopt/index.html.
+They run either under Linux or Windows/Cygwin. 
+Cygwin, the free UNIX-like environment for Windows, can be downloaded
+here: http://www.cygwin.com/.
