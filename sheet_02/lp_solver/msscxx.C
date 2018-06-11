@@ -48,11 +48,17 @@ int read_dimacs(char *f, int *pncount, int *pecount, int **pelist, int **pnweigh
 /** Build an lp for the instance (ncount, ecount, elist, nweights). */
 int build_lp(LINGOlp **lp, int ncount, int ecount, int *elist, int *nweights);
 
-/* Converts the int array returned by read_dimacs into
+/* Converts the int array 'pelist' of the edges returned by read_dimacs into
  * std::vector<std::vector<int>>
  * a vector of tupels of int
  * */
 std::vector<Edge> convert_elist_to_vector(const int elist[], const int ecount);
+
+/* Converts the int array 'pnweights' of the vertex positions returned by read_dimacs into
+ * std::vector<int>
+ * a vector of ints
+ * */
+std::vector<int> convert_to_vector(const int nweights[], const int ncount);
 
 /*Overloading the '<<' operator to print vectors*/
 template<typename T>
@@ -246,6 +252,13 @@ std::vector<Edge> convert_elist_to_vector(const int elist[], const int ecount){
     return edge_vector;
 }
 
+std::vector<int> convert_to_vector(const int nweights[], const int ncount){
+    std::vector<int> vertex_vector;
+    for(int i = 0; i < ncount; i++){
+        vertex_vector.push_back(nweights[i]);
+    }
+    return vertex_vector;
+}
 
 int main(int argc, char **argv) {
     // Initializations
@@ -258,6 +271,7 @@ int main(int argc, char **argv) {
     double *x = (double *) NULL;
 
     std::vector<Edge> edge_vector;
+    std::vector<int> vertex_vector;
 
     if (argc < 2) {
         printf("Usage mss <filename>\n");
@@ -271,9 +285,12 @@ int main(int argc, char **argv) {
     LINGOcheck_rval (rval, "read_dimacs failed");
 
     edge_vector = convert_elist_to_vector(elist, ecount);
+    vertex_vector = convert_to_vector(nweights, ncount);
 
     std::cout << "Edge list:" << std::endl;
     std::cout << edge_vector << std::endl;
+    std::cout << "Vertex positions:" << std::endl;
+    std::cout << vertex_vector << std::endl;
 
 //  rval = build_lp (&lp,  ncount,  ecount, elist, nweights);
 //  LINGOcheck_rval (rval, "build_lp failed");
