@@ -19,6 +19,7 @@
 #include <math.h>
 #include <string.h>
 #include <iomanip>
+#include <cassert>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +53,7 @@ int build_lp(LINGOlp **lp, int ncount, int ecount, int *elist, int *nweights);
  * std::vector<std::vector<int>>
  * a vector of tupels of int
  * */
-std::vector<Edge> convert_elist_to_vector(const int elist[], const int ecount);
+std::vector <Edge> convert_elist_to_vector(const int elist[], const int ecount);
 
 /* Converts the int array 'pnweights' of the vertex positions returned by read_dimacs into
  * std::vector<int>
@@ -60,9 +61,20 @@ std::vector<Edge> convert_elist_to_vector(const int elist[], const int ecount);
  * */
 std::vector<int> convert_to_vector(const int nweights[], const int ncount);
 
+std::vector <std::vector<size_t>> neighbors(const size_t number_of_vertices,
+                                            const std::vector <Edge> &edge_vector);
+
+double average_position_of_neighbours(const std::vector<double> &vertex_vector,
+                                      const size_t vertex_index,
+                                      const std::vector <std::vector<size_t>> &neighbors_vector);
+
+std::vector<double> iterate_average_position_of_neighbours(const std::vector<int> &vertex_vector,
+                                                           const std::vector<bool> &fixed_vertices_bool,
+                                                           const std::vector <Edge> &edge_vector);
+
 /*Overloading the '<<' operator to print vectors*/
 template<typename T>
-std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
+std::ostream &operator<<(std::ostream &out, const std::vector <T> &v) {
     out << "[";
     size_t last = v.size() - 1;
     for (size_t i = 0; i < v.size(); ++i) {
@@ -72,6 +84,24 @@ std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
     }
     out << "]";
     return out;
+}
+
+template<typename T>
+T linear_length(const std::vector <T> &vertex_vector, const std::vector <Edge> &edge_vector) {
+    T sum = 0;
+    for (auto edge : edge_vector) {
+        sum += std::abs(vertex_vector[edge[0]] - vertex_vector[edge[1]]);
+    }
+    return sum;
+}
+
+template<typename T>
+T quadratic_length(const std::vector <T> &vertex_vector, const std::vector <Edge> &edge_vector) {
+    T sum = 0;
+    for (auto edge : edge_vector) {
+        sum += std::pow(std::abs(vertex_vector[edge[0]] - vertex_vector[edge[1]]), 2);
+    }
+    return sum;
 }
 
 int read_dimacs(char *f, int *pncount, int *pecount, int **pelist,
@@ -241,24 +271,104 @@ int build_lp(LINGOlp **lp,
     return rval;
 }
 
-std::vector<Edge> convert_elist_to_vector(const int elist[], const int ecount){
-    std::vector<Edge> edge_vector;
-    for(int i = 0; i < 2*ecount; i+=2){
+std::vector <Edge> convert_elist_to_vector(const int elist[], const int ecount) {
+    std::vector <Edge> edge_vector;
+    for (int i = 0; i < 2 * ecount; i += 2) {
         Edge new_edge;
         new_edge.push_back(elist[i]);
-        new_edge.push_back(elist[i+1]);
+        new_edge.push_back(elist[i + 1]);
         edge_vector.push_back(new_edge);
     }
     return edge_vector;
 }
 
-std::vector<int> convert_to_vector(const int nweights[], const int ncount){
+std::vector<int> convert_to_vector(const int nweights[], const int ncount) {
     std::vector<int> vertex_vector;
-    for(int i = 0; i < ncount; i++){
+    for (int i = 0; i < ncount; i++) {
         vertex_vector.push_back(nweights[i]);
     }
     return vertex_vector;
 }
+
+// Returns a vector of length (# of vertices)
+// where each entry is the adjacency list of the corresponding vertex
+std::vector <std::vector<size_t>> neighbors(const size_t number_of_vertices,
+                                            const std::vector <Edge> &edge_vector) {
+    std::vector <std::vector<size_t>> neighbors_vector(number_of_vertices);
+    for (auto edge : edge_vector) {
+        neighbors_vector[edge[0]].push_back(edge[1]);
+        neighbors_vector[edge[1]].push_back(edge[0]);
+    }
+    return neighbors_vector;
+}
+
+/*  This function assumes that each vertex has at least one neighbor
+ *
+ * */
+double average_position_of_neighbours(const std::vector<double> &vertex_vector,
+                                      const size_t vertex_index,
+                                      const std::vector <std::vector<size_t>> &neighbors_vector) {
+    double sum = 0;
+    assert(neighbors_vector[vertex_index].size() >= 1);
+    assert(vertex_index < vertex_vector.size());
+    for (auto index : neighbors_vector[vertex_index]) {
+        sum += vertex_vector[index];
+    }
+    return sum / (double) neighbors_vector[vertex_index].size();
+}
+
+std::vector<double> iterate_average_position_of_neighbours(const std::vector<int> &vertex_vector,
+                                                           const std::vector<bool> &fixed_vertices_bool,
+                                                           const std::vector <Edge> &edge_vector) {
+    double maximum_circuit_movement = 0;
+    // Can choose any initial position according to the exercise
+    // Just copy the values for the fixed vector
+
+    std::vector<double> new_vertex_positions;
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (fixed_vertices_bool[i] == true) {
+            new_vertex_positions.push_back((double) vertex_vector[i]);
+        } else {
+            // Set the initial position of all unfixed vertices to 1
+            new_vertex_positions.push_back((double) 1.0);
+        }
+    }
+
+    std::vector <std::vector<size_t>> neighbors_vector = neighbors(vertex_vector.size(), edge_vector);
+//    std::cout << "neighbors_vector:" << std::endl;
+//    std::cout << neighbors_vector << std::endl;
+
+    std::vector <size_t> indices_that_are_updated;
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (fixed_vertices_bool[i] == false) {
+            indices_that_are_updated.push_back(i);
+        }
+    }
+// std::cout << indices_that_are_updated << std::endl;
+
+    size_t iteration = 0;
+    do {
+        maximum_circuit_movement = 0;
+        for (auto index : indices_that_are_updated) {
+            double new_position = average_position_of_neighbours(new_vertex_positions, index, neighbors_vector);
+            if (std::abs(new_position - new_vertex_positions[index]) > maximum_circuit_movement) {
+                maximum_circuit_movement = std::abs(new_position - new_vertex_positions[index]);
+            }
+            new_vertex_positions[index] = new_position;
+        }
+//        std::cout << "Iteration "
+//                  << iteration
+//                  << ", Quadratic length: "
+//                  << quadratic_length(new_vertex_positions, edge_vector)
+//                  << std::endl;
+//        std::cout << "new_vertex_positions:" << std::endl;
+//        std::cout << new_vertex_positions << std::endl;
+        iteration++;
+    } while (maximum_circuit_movement >= 0.1);
+
+    return new_vertex_positions;
+}
+
 
 int main(int argc, char **argv) {
     // Initializations
@@ -270,8 +380,13 @@ int main(int argc, char **argv) {
     LINGOlp *lp = (LINGOlp *) NULL;
     double *x = (double *) NULL;
 
-    std::vector<Edge> edge_vector;
+    std::vector <Edge> edge_vector;
     std::vector<int> vertex_vector;
+    // This vector indicates if the specified vertex at the position has to remain
+    // fixed (i.e. it is preplaced)
+    std::vector<bool> fixed_vertices_bool;
+
+    std::vector<double> result_a;
 
     if (argc < 2) {
         printf("Usage mss <filename>\n");
@@ -286,11 +401,33 @@ int main(int argc, char **argv) {
 
     edge_vector = convert_elist_to_vector(elist, ecount);
     vertex_vector = convert_to_vector(nweights, ncount);
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (vertex_vector[i] == -1) {
+            fixed_vertices_bool.push_back(false);
+        } else {
+            fixed_vertices_bool.push_back(true);
+        }
+    }
 
-    std::cout << "Edge list:" << std::endl;
+    std::cout << "edge_vector:" << std::endl;
     std::cout << edge_vector << std::endl;
-    std::cout << "Vertex positions:" << std::endl;
+    std::cout << "vertex_vector:" << std::endl;
     std::cout << vertex_vector << std::endl;
+    std::cout << "fixed_vertices_bool:" << std::endl;
+    std::cout << fixed_vertices_bool << std::endl;
+
+    result_a = iterate_average_position_of_neighbours(vertex_vector, fixed_vertices_bool, edge_vector);
+    std::cout << "-----(a)-----" << std::endl;
+    std::cout << "result_a:" << std::endl;
+    std::cout << result_a << std::endl;
+    std::cout << "linear_length_a: " << linear_length(result_a, edge_vector) << std::endl;
+    std::cout << "quadratic_length_a: " << quadratic_length(result_a, edge_vector) << std::endl;
+    std::cout << "Positions g of the circuits C:" << std::endl;
+    for(size_t i = 0; i < vertex_vector.size(); i++){
+        if(fixed_vertices_bool[i] == false){
+            std::cout << i << " " << result_a[i] << std::endl;
+        }
+    }
 
 //  rval = build_lp (&lp,  ncount,  ecount, elist, nweights);
 //  LINGOcheck_rval (rval, "build_lp failed");
