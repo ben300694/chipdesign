@@ -47,7 +47,10 @@ using Edge = std::vector<int>;
 int read_dimacs(char *f, int *pncount, int *pecount, int **pelist, int **pnweights);
 
 /** Build an lp for the instance (ncount, ecount, elist, nweights). */
-int build_lp(LINGOlp **lp, int ncount, int ecount, int *elist, int *nweights);
+int build_lp(LINGOlp **lp,
+             const std::vector<int> &vertex_vector,
+             const std::vector<bool> &fixed_vertices_bool,
+             const std::vector <Edge> &edge_vector);
 
 /* Converts the int array 'pelist' of the edges returned by read_dimacs into
  * std::vector<std::vector<int>>
@@ -219,58 +222,6 @@ int read_dimacs(char *f, int *pncount, int *pecount, int **pelist,
 }
 
 
-int build_lp(LINGOlp **lp,
-             int ncount, int ecount, int *elist, int *nweights) {
-    int rval = 0;
-    int i;
-
-    rval = LINGOlp_init(lp, "MSSlp");
-    LINGOcheck_rval (rval, "LINGOlp_init failed");
-
-    rval = LINGOlp_objective_sense(*lp, LINGOlp_MAX);
-    LINGOcheck_rval (rval, "LINGOlp_objective_sense");
-
-    for (i = 0; i < ncount; i++) {
-        double w = (double) nweights[i];
-        /* As no rows were defined yet, nzcount, rind, and rval are 0.*/
-        rval = LINGOlp_addcol(*lp, 0, (int *) NULL, (double *) NULL,
-                              w, 0.0, 1.0, LINGOlp_CONTINUOUS, NULL);
-        LINGOcheck_rval (rval, "LINGOlp_addcol failed");
-    }
-
-    for (i = 0; i < ecount; i++) {
-        int v = elist[2 * i];
-        int w = elist[2 * i + 1];
-        int count = 2;
-        int inodes[2];
-        double coef[2] = {1.0, 1.0};
-        double rhs = 1.0;
-        inodes[0] = v;
-        inodes[1] = w;
-
-        rval = LINGOlp_addrow(*lp, count, inodes, coef, LINGOlp_LESS_EQUAL,
-                              rhs, NULL);
-        if (rval) LINGOlp_printerrorcode(rval);
-        LINGOcheck_rval (rval, "LINGOlp_addrow failed");
-
-        /** To see how you can incrementally add rows and optimize
-        comment out the following block.
-        */
-        /* { */
-        /*    double obj; */
-        /*    rval = LINGOlp_optimize (*lp); */
-        /*    LINGOcheck_rval (rval, "LINGOlp_optimize failed"); */
-
-        /*    rval = LINGOlp_objval ( *lp, &obj); */
-        /*    LINGOcheck_rval (rval, "LINGOlp_objval failed"); */
-        /*    printf("Objective after adding %i constraints/rows: %f.\n",i+1,obj); */
-        /* } */
-
-    }
-    CLEANUP:
-    return rval;
-}
-
 std::vector <Edge> convert_elist_to_vector(const int elist[], const int ecount) {
     std::vector <Edge> edge_vector;
     for (int i = 0; i < 2 * ecount; i += 2) {
@@ -369,6 +320,115 @@ std::vector<double> iterate_average_position_of_neighbours(const std::vector<int
     return new_vertex_positions;
 }
 
+int build_lp(LINGOlp **lp,
+             const std::vector<int> &vertex_vector,
+             const std::vector<bool> &fixed_vertices_bool,
+             const std::vector <Edge> &edge_vector) {
+    int rval = 0;
+    size_t i;
+
+    rval = LINGOlp_init(lp, "MSSlp");
+    LINGOcheck_rval (rval, "LINGOlp_init failed");
+
+    rval = LINGOlp_objective_sense(*lp, LINGOlp_MIN);
+    LINGOcheck_rval (rval, "LINGOlp_objective_sense");
+
+    /** Add a column/variable to the LP.
+    p       : The LP
+    nzcount : number of non-zero row-entries of the new column.
+    rind    : array of length nzcount, specifying the (non-zero) row/constraint
+              indices of the new column.
+    rvals   : array of length nzcount, specifying the coefficients of the
+              rows/contraints specified in rind.
+    obj     : coefficient in the objective (c-vector) of the new variable.
+    lb      : lower bound for the new variable.
+    ub      : upper bound for the new variable.
+    vartype : Variable type: one of LINGOlp_CONTINUOUS, LINGOlp_INTEGER and LINGOlp_BINARY.
+              The latter two are not valid in this context.
+    name    : name of the constraint, which can be set to (char*) NULL.
+
+    int LINGOlp_addcol (LINGOlp *p, int nzcount, int *rind, double *rvals,
+                       double obj, double lb, double ub, char vartype, char *name);
+    */
+
+    // Add a variable g_v for each vertex v
+    // The variables in C (vertices that are to be placed)
+    // are constrained to be in the range {1, ..., k=vertex_vector.size()}
+    // The preplaced vertices are constrained to their fixed position
+    // The cost/coefficient in the c-vector is zero for these variables
+    for (i = 0; i < vertex_vector.size(); i++) {
+        /* As no rows were defined yet, nzcount, rind, and rval are 0.*/
+        if (fixed_vertices_bool[i] == false) {
+            // Free vertex
+            rval = LINGOlp_addcol(*lp, 0, (int *) NULL, (double *) NULL,
+                                  0, 1.0, (double) vertex_vector.size(), LINGOlp_CONTINUOUS, NULL);
+            LINGOcheck_rval (rval, "LINGOlp_addcol failed");
+        } else {
+            // Fixed vertex
+            rval = LINGOlp_addcol(*lp, 0, (int *) NULL, (double *) NULL,
+                                  0, (double) vertex_vector[i], (double) vertex_vector[i], LINGOlp_CONTINUOUS, NULL);
+            LINGOcheck_rval (rval, "LINGOlp_addcol failed");
+        }
+    }
+    // Add a variable delta_e for each edge
+    // Later we will add the constraints for e=(v,w):
+    // g_v - g_w <= delta_e
+    // g_w - g_v <= delta_e
+    // This ensures that delta_e is set to be greater or equal to
+    // the absolute difference between start and end position
+    //
+    // The cost/coefficient in the c-vector is set to 1
+    for (auto edge : edge_vector) {
+        rval = LINGOlp_addcol(*lp, 0, (int *) NULL, (double *) NULL,
+                              1, 0.0, (double) vertex_vector.size(), LINGOlp_CONTINUOUS, NULL);
+        LINGOcheck_rval (rval, "LINGOlp_addcol failed");
+    }
+
+    /** Add a row/constraint to the LP (sparsely). Parameters:
+    p       : The LP
+    nzcount : number of (non-zero) column-entries in the new row.
+    cind    : array of length nzcount, specifying the (non-zero) column/variable
+              indices of the new row.
+    cval    : array of length nzcount, specifying the coefficients of the
+              columns/variables specified in cind.
+    sense   : type of inequalitym either LINGOlp_EQUAL, LINGOlp_LESS_EQUAL, or
+              LINGOlp_GREATER_EQUAL
+    rhs     : the right hand side (b-component) of the constraint.
+    name    : name of the constraint, which can be set to (char*) NULL.
+
+    int LINGOlp_addrow (LINGOlp *p, int nzcount, int *cind, double *cval,
+                        char sense, double rhs, char *name);
+    */
+
+    for (i = 0; i < edge_vector.size(); i++) {
+        Edge edge = edge_vector[i];
+        int nzcount = 3;
+        double cval[3] = {1.0, -1.0, -1.0};
+        double rhs = 0.0;
+        int cind[3];
+        cind[0] = edge[0];
+        cind[1] = edge[1];
+        cind[2] = vertex_vector.size() + i;
+
+        // g_v - g_w - delta_e <= 0
+        rval = LINGOlp_addrow(*lp, nzcount, cind, cval, LINGOlp_LESS_EQUAL,
+                              rhs, NULL);
+        if (rval) LINGOlp_printerrorcode(rval);
+        LINGOcheck_rval (rval, "LINGOlp_addrow failed");
+
+        cval[0] = -1.0;
+        cval[1] = 1.0;
+        // - g_v + g_w - delta_e <= 0
+        rval = LINGOlp_addrow(*lp, nzcount, cind, cval, LINGOlp_LESS_EQUAL,
+                              rhs, NULL);
+        if (rval) LINGOlp_printerrorcode(rval);
+        LINGOcheck_rval (rval, "LINGOlp_addrow failed");
+    }
+
+    CLEANUP:
+    return rval;
+}
+
 
 int main(int argc, char **argv) {
     // Initializations
@@ -423,30 +483,30 @@ int main(int argc, char **argv) {
     std::cout << "linear_length_a: " << linear_length(result_a, edge_vector) << std::endl;
     std::cout << "quadratic_length_a: " << quadratic_length(result_a, edge_vector) << std::endl;
     std::cout << "Positions g of the circuits C:" << std::endl;
-    for(size_t i = 0; i < vertex_vector.size(); i++){
-        if(fixed_vertices_bool[i] == false){
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (fixed_vertices_bool[i] == false) {
             std::cout << i << " " << result_a[i] << std::endl;
         }
     }
 
-//  rval = build_lp (&lp,  ncount,  ecount, elist, nweights);
-//  LINGOcheck_rval (rval, "build_lp failed");
-//
-//  rval = LINGOlp_optimize (lp);
-//  LINGOcheck_rval (rval, "LINGOlp_optimize failed");
-//
-//  /** Allocate an array for storing the primal solution.*/
-//  x = (double*) malloc(ncount * sizeof(double));
-//  LINGOcheck_NULL(x,"Failed to allocate result vector x.");
-//
-//  /** Retrieve the primal solution.*/
-//  rval =  LINGOlp_x (lp,x);
-//  LINGOcheck_rval (rval, "LINGOlp_x failed");
-//
-//  printf ("Printing solution:\n");
-//  for (int i = 0; i < ncount; ++i) {
-//    printf ("node %d val %f.\n", i, x[i]);
-//  }
+    rval = build_lp(&lp, vertex_vector, fixed_vertices_bool, edge_vector);
+    LINGOcheck_rval (rval, "build_lp failed");
+
+    rval = LINGOlp_optimize(lp);
+    LINGOcheck_rval (rval, "LINGOlp_optimize failed");
+
+    /** Allocate an array for storing the primal solution.*/
+    x = (double *) malloc((vertex_vector.size() + edge_vector.size()) * sizeof(double));
+    LINGOcheck_NULL(x, "Failed to allocate result vector x.");
+
+    /** Retrieve the primal solution.*/
+    rval = LINGOlp_x(lp, x);
+    LINGOcheck_rval (rval, "LINGOlp_x failed");
+
+    printf("Printing solution:\n");
+    for (int i = 0; i < ncount; ++i) {
+        printf("node %d val %f.\n", i, x[i]);
+    }
 
     CLEANUP:
     if (elist) free(elist);
