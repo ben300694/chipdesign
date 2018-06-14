@@ -75,6 +75,10 @@ std::vector<double> iterate_average_position_of_neighbours(const std::vector<int
                                                            const std::vector<bool> &fixed_vertices_bool,
                                                            const std::vector <Edge> &edge_vector);
 
+std::vector<double> positions_with_lp(const std::vector<int> &vertex_vector,
+                      const std::vector<bool> &fixed_vertices_bool,
+                      const std::vector <Edge> &edge_vector);
+
 /*Overloading the '<<' operator to print vectors*/
 template<typename T>
 std::ostream &operator<<(std::ostream &out, const std::vector <T> &v) {
@@ -429,6 +433,35 @@ int build_lp(LINGOlp **lp,
     return rval;
 }
 
+std::vector<double> positions_with_lp(const std::vector<int> &vertex_vector,
+                      const std::vector<bool> &fixed_vertices_bool,
+                      const std::vector <Edge> &edge_vector) {
+    int rval = 0;
+    LINGOlp *lp = (LINGOlp *) NULL;
+    double *x = (double *) NULL;
+    std::vector<double> result_b;
+
+    rval = build_lp(&lp, vertex_vector, fixed_vertices_bool, edge_vector);
+    LINGOcheck_rval (rval, "build_lp failed");
+
+    rval = LINGOlp_optimize(lp);
+    LINGOcheck_rval (rval, "LINGOlp_optimize failed");
+
+    /** Allocate an array for storing the primal solution.*/
+    x = (double *) malloc((vertex_vector.size() + edge_vector.size()) * sizeof(double));
+    LINGOcheck_NULL(x, "Failed to allocate result vector x.");
+
+    /** Retrieve the primal solution.*/
+    rval = LINGOlp_x(lp, x);
+    LINGOcheck_rval (rval, "LINGOlp_x failed");
+    // Convert the node coordinates to vector
+    result_b = std::vector<double>(x, x + vertex_vector.size());
+
+    CLEANUP:
+    if (x) free(x);
+    LINGOlp_free(&lp);
+    return result_b;
+}
 
 int main(int argc, char **argv) {
     // Initializations
@@ -437,8 +470,6 @@ int main(int argc, char **argv) {
     int ncount, ecount;
     int *elist = (int *) NULL;
     int *nweights = (int *) NULL;
-    LINGOlp *lp = (LINGOlp *) NULL;
-    double *x = (double *) NULL;
 
     std::vector <Edge> edge_vector;
     std::vector<int> vertex_vector;
@@ -447,6 +478,7 @@ int main(int argc, char **argv) {
     std::vector<bool> fixed_vertices_bool;
 
     std::vector<double> result_a;
+    std::vector<double> result_b;
 
     if (argc < 2) {
         printf("Usage mss <filename>\n");
@@ -476,43 +508,51 @@ int main(int argc, char **argv) {
     std::cout << "fixed_vertices_bool:" << std::endl;
     std::cout << fixed_vertices_bool << std::endl;
 
+    std::cout << std::endl << "BEGIN -----(a)-----" << std::endl;
+
     result_a = iterate_average_position_of_neighbours(vertex_vector, fixed_vertices_bool, edge_vector);
-    std::cout << "-----(a)-----" << std::endl;
     std::cout << "result_a:" << std::endl;
     std::cout << result_a << std::endl;
     std::cout << "linear_length_a: " << linear_length(result_a, edge_vector) << std::endl;
     std::cout << "quadratic_length_a: " << quadratic_length(result_a, edge_vector) << std::endl;
-    std::cout << "Positions g of the circuits C:" << std::endl;
+    std::cout << "Positions g of the circuits C for (a):" << std::endl;
     for (size_t i = 0; i < vertex_vector.size(); i++) {
         if (fixed_vertices_bool[i] == false) {
             std::cout << i << " " << result_a[i] << std::endl;
         }
     }
 
-    rval = build_lp(&lp, vertex_vector, fixed_vertices_bool, edge_vector);
-    LINGOcheck_rval (rval, "build_lp failed");
+    std::cout << "END -----(a)-----" << std::endl << std::endl;
 
-    rval = LINGOlp_optimize(lp);
-    LINGOcheck_rval (rval, "LINGOlp_optimize failed");
+    //-------------------------------
 
-    /** Allocate an array for storing the primal solution.*/
-    x = (double *) malloc((vertex_vector.size() + edge_vector.size()) * sizeof(double));
-    LINGOcheck_NULL(x, "Failed to allocate result vector x.");
+    std::cout << std::endl <<"BEGIN -----(b)-----" << std::endl;
 
-    /** Retrieve the primal solution.*/
-    rval = LINGOlp_x(lp, x);
-    LINGOcheck_rval (rval, "LINGOlp_x failed");
-
-    printf("Printing solution:\n");
-    for (int i = 0; i < ncount; ++i) {
-        printf("node %d val %f.\n", i, x[i]);
+    result_b = positions_with_lp(vertex_vector, fixed_vertices_bool, edge_vector);
+    std::cout << "result_b:" << std::endl;
+    std::cout << result_b << std::endl;
+    std::cout << "linear_length_b: " << linear_length(result_b, edge_vector) << std::endl;
+    std::cout << "quadratic_length_b: " << quadratic_length(result_b, edge_vector) << std::endl;
+    std::cout << "Positions g of the circuits C for (b):" << std::endl;
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (fixed_vertices_bool[i] == false) {
+            std::cout << i << " " << result_b[i] << std::endl;
+        }
     }
+
+    std::cout << "END -----(b)-----" << std::endl << std::endl;
+
+    //------------------------------
+
+    // Method using (a)
+
+
+    // Method using (b)
 
     CLEANUP:
     if (elist) free(elist);
     if (nweights) free(nweights);
-    if (x) free(x);
-    LINGOlp_free(&lp);
+
 
     return rval;
 }
