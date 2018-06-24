@@ -20,6 +20,7 @@
 #include <string.h>
 #include <iomanip>
 #include <cassert>
+#include <algorithm>
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,8 +77,8 @@ std::vector<double> iterate_average_position_of_neighbours(const std::vector<int
                                                            const std::vector <Edge> &edge_vector);
 
 std::vector<double> positions_with_lp(const std::vector<int> &vertex_vector,
-                      const std::vector<bool> &fixed_vertices_bool,
-                      const std::vector <Edge> &edge_vector);
+                                      const std::vector<bool> &fixed_vertices_bool,
+                                      const std::vector <Edge> &edge_vector);
 
 /*Overloading the '<<' operator to print vectors*/
 template<typename T>
@@ -434,8 +435,8 @@ int build_lp(LINGOlp **lp,
 }
 
 std::vector<double> positions_with_lp(const std::vector<int> &vertex_vector,
-                      const std::vector<bool> &fixed_vertices_bool,
-                      const std::vector <Edge> &edge_vector) {
+                                      const std::vector<bool> &fixed_vertices_bool,
+                                      const std::vector <Edge> &edge_vector) {
     int rval = 0;
     LINGOlp *lp = (LINGOlp *) NULL;
     double *x = (double *) NULL;
@@ -463,6 +464,98 @@ std::vector<double> positions_with_lp(const std::vector<int> &vertex_vector,
     return result_b;
 }
 
+
+bool are_all_vertices_fixed(const std::vector<bool> &fixed_vertices_bool) {
+    for (auto value : fixed_vertices_bool) {
+        if (value == false) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+T median(std::vector <T> v) {
+    size_t n = v.size() / 2;
+    std::nth_element(v.begin(), v.begin() + n, v.end());
+    return v[n];
+}
+
+std::vector<double> unassigned_positions(const std::vector<double> &vertex_vector,
+                                         const std::vector<bool> &fixed_vertices_bool) {
+    std::vector<double> unassigned_positions;
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (fixed_vertices_bool[i] == false) {
+            unassigned_positions.push_back(vertex_vector[i]);
+        }
+    }
+    return unassigned_positions;
+}
+
+std::vector<int> available_positions(const std::vector<int> &vertex_vector,
+                                     const std::vector<bool> &fixed_vertices_bool) {
+    std::vector<bool> available_index(fixed_vertices_bool.size(), true);
+    for (size_t i = 0; i < fixed_vertices_bool.size(); i++) {
+        if (fixed_vertices_bool[i] == true) {
+            available_index[vertex_vector[i] - 1] = false;
+        }
+    }
+
+    std::vector<int> available_positions;
+    for (size_t i = 0; i < available_index.size(); i++) {
+        if (available_index[i] == true) {
+            available_positions.push_back(i + 1);
+        }
+    }
+
+    return available_positions;
+}
+
+std::vector<int> exercise_c_with_a(const std::vector<int> &vertex_vector,
+                                   const std::vector<bool> &fixed_vertices_bool,
+                                   const std::vector <Edge> &edge_vector) {
+    if (are_all_vertices_fixed(fixed_vertices_bool) == true) {
+        return vertex_vector;
+    }
+
+    // Obtain some g which is not necessarily injective and integral
+    std::vector<double> noninjective_fractional_solution = iterate_average_position_of_neighbours(vertex_vector,
+                                                                                                  fixed_vertices_bool,
+                                                                                                  edge_vector);
+
+    std::cout << "noninjective_fractional_solution: " << noninjective_fractional_solution << std::endl;
+    std::vector<double> unassigned_pos = unassigned_positions(noninjective_fractional_solution, fixed_vertices_bool);
+    std::cout << "unassigned_pos: " << unassigned_pos << std::endl;
+
+    double median_unassigned_value = median(unassigned_pos);
+
+    size_t index_of_median_unassigned_value;
+    // Find index of median unfixed vertex
+    for (size_t i = 0; i < noninjective_fractional_solution.size(); i++) {
+        if (fixed_vertices_bool[i] == true) continue;
+        if (noninjective_fractional_solution[i] == median_unassigned_value) {
+            index_of_median_unassigned_value = i;
+            break;
+        }
+    }
+    std::cout << "median_unassigned_value: " << median_unassigned_value << std::endl;
+    std::cout << "index_of_median_unassigned_value: " << index_of_median_unassigned_value << std::endl;
+
+    std::vector<int> available_pos = available_positions(vertex_vector, fixed_vertices_bool);
+    std::cout << "available_positions: " << available_pos << std::endl;
+
+    int median_available_position = median(available_pos);
+    std::cout << "median_available_position: " << median_available_position << std::endl;
+
+    // Pick median unassigned circuit and assign it to the median available position in f
+    std::vector<int> vertex_vector_new(vertex_vector);
+    vertex_vector_new[index_of_median_unassigned_value] = median_available_position;
+
+    std::cout << "vertex_vector_new: " << vertex_vector_new << std::endl;
+
+    return available_pos; //TODO
+}
+
 int main(int argc, char **argv) {
     // Initializations
     char *dimacs_fname = (char *) NULL;
@@ -473,12 +566,15 @@ int main(int argc, char **argv) {
 
     std::vector <Edge> edge_vector;
     std::vector<int> vertex_vector;
+
     // This vector indicates if the specified vertex at the position has to remain
     // fixed (i.e. it is preplaced)
     std::vector<bool> fixed_vertices_bool;
 
     std::vector<double> result_a;
     std::vector<double> result_b;
+    std::vector<int> result_c_a;
+    std::vector<int> result_c_b;
 
     if (argc < 2) {
         printf("Usage mss <filename>\n");
@@ -526,7 +622,7 @@ int main(int argc, char **argv) {
 
     //-------------------------------
 
-    std::cout << std::endl <<"BEGIN -----(b)-----" << std::endl;
+    std::cout << std::endl << "BEGIN -----(b)-----" << std::endl;
 
     result_b = positions_with_lp(vertex_vector, fixed_vertices_bool, edge_vector);
     std::cout << "result_b:" << std::endl;
@@ -545,6 +641,22 @@ int main(int argc, char **argv) {
     //------------------------------
 
     // Method using (a)
+
+    std::cout << std::endl << "BEGIN -----(c_a)-----" << std::endl;
+
+    result_c_a = exercise_c_with_a(vertex_vector, fixed_vertices_bool, edge_vector);
+    std::cout << "result_c_a:" << std::endl;
+    std::cout << result_c_a << std::endl;
+    std::cout << "linear_length_c_a: " << linear_length(result_c_a, edge_vector) << std::endl;
+    std::cout << "quadratic_length_c_a: " << quadratic_length(result_c_a, edge_vector) << std::endl;
+    std::cout << "Positions g of the circuits C for (c_a):" << std::endl;
+    for (size_t i = 0; i < vertex_vector.size(); i++) {
+        if (fixed_vertices_bool[i] == false) {
+            std::cout << i << " " << result_c_a[i] << std::endl;
+        }
+    }
+
+    std::cout << "END -----(c_a)-----" << std::endl << std::endl;
 
 
     // Method using (b)
