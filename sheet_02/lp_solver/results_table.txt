@@ -1,0 +1,519 @@
+----------------------------------------
+Calling program on  ./instances/grid1.dimacs
+Number of Nodes: 15
+Number of Edges: 22
+edge_vector:
+[  [  0,   1],   [  1,   2],   [  2,   3],   [  3,   4],   [  5,   6],   [  6,   7],   [  7,   8],   [  8,   9],   [ 10,  11],   [ 11,  12],   [ 12,  13],   [ 13,  14],   [  0,   5],   [  1,   6],   [  2,   7],   [  3,   8],   [  4,   9],   [  5,  10],   [  6,  11],   [  7,  12],   [  8,  13],   [  9,  14]]
+vertex_vector:
+[  1,  -1,  -1,  -1,   8,  -1,  -1,  -1,  -1,  -1,   3,  -1,  -1,  -1,  15]
+fixed_vertices_bool:
+[  1,   0,   0,   0,   1,   0,   0,   0,   0,   0,   1,   0,   0,   0,   1]
+
+BEGIN -----(a)-----
+result_a:
+[  1, 3.73548, 5.8973, 7.52679,   8, 2.79708, 4.46087, 6.55606, 8.73315, 10.5777,   3, 4.88129, 7.24202, 10.3251,  15]
+linear_length_a: 41.0694
+quadratic_length_a: 105.877
+Positions g of the circuits C for (a):
+1 3.73548
+2 5.8973
+3 7.52679
+5 2.79708
+6 4.46087
+7 6.55606
+8 8.73315
+9 10.5777
+11 4.88129
+12 7.24202
+13 10.3251
+END -----(a)-----
+
+
+BEGIN -----(b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 44 rows and 81 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.001, pI = 0, pII = 0, dI = 0, dII = 25, opt = 33.000000
+starting ILLsimplex on MSSlp...
+Problem has 44 rows and 81 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 33.000000
+result_b:
+[  1,   3,   3,   3,   8,   3,   3,   3,   3,   8,   3,   3,   3,   3,  15]
+linear_length_b: 33
+quadratic_length_b: 251
+Positions g of the circuits C for (b):
+1 3
+2 3
+3 3
+5 3
+6 3
+7 3
+8 3
+9 8
+11 3
+12 3
+13 3
+END -----(b)-----
+
+
+BEGIN -----(c_a)-----
+result_c_a:
+[  1,   3,   4,   3,   8,   2,   5,   9,  11,   2,   3,   1,   4,   5,  15]
+linear_length_c_a: 94
+quadratic_length_c_a: 632
+Positions g of the circuits C for (c_a):
+0 1
+1 3
+2 4
+3 3
+4 8
+5 2
+6 5
+7 9
+8 11
+9 2
+10 3
+11 1
+12 4
+13 5
+14 15
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_a)-----
+
+
+BEGIN -----(c_b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 44 rows and 81 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 25, opt = 33.000000
+starting ILLsimplex on MSSlp...
+Problem has 44 rows and 81 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 33.000000
+result_c_b:
+[  1,   9,   7,   2,   8,   3,   4,   5,   8,   4,   3,   2,   9,  11,  15]
+linear_length_c_b: 83
+quadratic_length_c_b: 461
+Positions g of the circuits C for (c_b):
+0 1
+1 9
+2 7
+3 2
+4 8
+5 3
+6 4
+7 5
+8 8
+9 4
+10 3
+11 2
+12 9
+13 11
+14 15
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_b)-----
+
+----------------------------------------
+----------------------------------------
+Calling program on  ./instances/path1.dimacs
+Number of Nodes: 10
+Number of Edges: 9
+edge_vector:
+[  [  0,   1],   [  1,   2],   [  2,   3],   [  3,   4],   [  4,   5],   [  5,   6],   [  6,   7],   [  7,   8],   [  8,   9]]
+vertex_vector:
+[  1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1]
+fixed_vertices_bool:
+[  1,   0,   0,   0,   0,   0,   0,   0,   0,   0]
+
+BEGIN -----(a)-----
+result_a:
+[  1,   1,   1,   1,   1,   1,   1,   1,   1,   1]
+linear_length_a: 0
+quadratic_length_a: 0
+Positions g of the circuits C for (a):
+1 1
+2 1
+3 1
+4 1
+5 1
+6 1
+7 1
+8 1
+9 1
+END -----(a)-----
+
+
+BEGIN -----(b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 0.000000
+starting ILLsimplex on MSSlp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 0.000000
+result_b:
+[  1,   1,   1,   1,   1,   1,   1,   1,   1,   1]
+linear_length_b: 0
+quadratic_length_b: 0
+Positions g of the circuits C for (b):
+1 1
+2 1
+3 1
+4 1
+5 1
+6 1
+7 1
+8 1
+9 1
+END -----(b)-----
+
+
+BEGIN -----(c_a)-----
+result_c_a:
+[  1,   6,   2,   3,   4,   5,   6,   7,   3,   2]
+linear_length_c_a: 19
+quadratic_length_c_a: 63
+Positions g of the circuits C for (c_a):
+0 1
+1 6
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 3
+9 2
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_a)-----
+
+
+BEGIN -----(c_b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 0.000000
+starting ILLsimplex on MSSlp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 0.000000
+result_c_b:
+[  1,   6,   2,   3,   4,   5,   6,   7,   3,   2]
+linear_length_c_b: 19
+quadratic_length_c_b: 63
+Positions g of the circuits C for (c_b):
+0 1
+1 6
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 3
+9 2
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_b)-----
+
+----------------------------------------
+----------------------------------------
+Calling program on  ./instances/path2.dimacs
+Number of Nodes: 10
+Number of Edges: 9
+edge_vector:
+[  [  0,   1],   [  1,   2],   [  2,   3],   [  3,   4],   [  4,   5],   [  5,   6],   [  6,   7],   [  7,   8],   [  8,   9]]
+vertex_vector:
+[  1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  10]
+fixed_vertices_bool:
+[  1,   0,   0,   0,   0,   0,   0,   0,   0,   1]
+
+BEGIN -----(a)-----
+result_a:
+[  1, 1.70972, 2.48705, 3.35022, 4.30534, 5.34703, 6.46031, 7.62355, 8.81178,  10]
+linear_length_a: 9
+quadratic_length_a: 9.26666
+Positions g of the circuits C for (a):
+1 1.70972
+2 2.48705
+3 3.35022
+4 4.30534
+5 5.34703
+6 6.46031
+7 7.62355
+8 8.81178
+END -----(a)-----
+
+
+BEGIN -----(b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 18 rows and 37 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 11, opt = 9.000000
+starting ILLsimplex on MSSlp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 9.000000
+result_b:
+[  1,  10,  10,  10,  10,  10,  10,  10,  10,  10]
+linear_length_b: 9
+quadratic_length_b: 81
+Positions g of the circuits C for (b):
+1 10
+2 10
+3 10
+4 10
+5 10
+6 10
+7 10
+8 10
+END -----(b)-----
+
+
+BEGIN -----(c_a)-----
+result_c_a:
+[  1,   2,   3,   4,   5,   6,   7,   8,   3,  10]
+linear_length_c_a: 19
+quadratic_length_c_a: 81
+Positions g of the circuits C for (c_a):
+0 1
+1 2
+2 3
+3 4
+4 5
+5 6
+6 7
+7 8
+8 3
+9 10
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_a)-----
+
+
+BEGIN -----(c_b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 18 rows and 37 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 11, opt = 9.000000
+starting ILLsimplex on MSSlp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 9.000000
+result_c_b:
+[  1,   6,   2,   3,   4,   5,   6,   7,   3,  10]
+linear_length_c_b: 25
+quadratic_length_c_b: 111
+Positions g of the circuits C for (c_b):
+0 1
+1 6
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 3
+9 10
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_b)-----
+
+----------------------------------------
+----------------------------------------
+Calling program on  ./instances/path3.dimacs
+Number of Nodes: 10
+Number of Edges: 9
+edge_vector:
+[  [  0,   1],   [  1,   2],   [  2,   3],   [  3,   4],   [  4,   5],   [  5,   6],   [  6,   7],   [  7,   8],   [  8,   9]]
+vertex_vector:
+[  1,  -1,  -1,   6,  -1,   4,  -1,  -1,  -1,  10]
+fixed_vertices_bool:
+[  1,   0,   0,   1,   0,   1,   0,   0,   0,   1]
+
+BEGIN -----(a)-----
+result_a:
+[  1, 2.66626, 4.33313,   6,   5,   4, 5.41797, 6.91797, 8.45898,  10]
+linear_length_a: 13
+quadratic_length_a: 19.3434
+Positions g of the circuits C for (a):
+1 2.66626
+2 4.33313
+4 5
+6 5.41797
+7 6.91797
+8 8.45898
+END -----(a)-----
+
+
+BEGIN -----(b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 18 rows and 37 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 13, opt = 13.000000
+starting ILLsimplex on MSSlp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 13.000000
+result_b:
+[  1,   1,   6,   6,   6,   4,  10,  10,  10,  10]
+linear_length_b: 13
+quadratic_length_b: 65
+Positions g of the circuits C for (b):
+1 1
+2 6
+4 6
+6 10
+7 10
+8 10
+END -----(b)-----
+
+
+BEGIN -----(c_a)-----
+result_c_a:
+[  1,   2,   3,   6,   5,   4,   7,   6,   8,  10]
+linear_length_c_a: 15
+quadratic_length_c_a: 31
+Positions g of the circuits C for (c_a):
+0 1
+1 2
+2 3
+3 6
+4 5
+5 4
+6 7
+7 6
+8 8
+9 10
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_a)-----
+
+
+BEGIN -----(c_b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 18 rows and 37 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 13, opt = 13.000000
+starting ILLsimplex on MSSlp...
+Problem has 18 rows and 37 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 13.000000
+result_c_b:
+[  1,   2,   3,   6,   5,   4,   7,   6,   8,  10]
+linear_length_c_b: 15
+quadratic_length_c_b: 31
+Positions g of the circuits C for (c_b):
+0 1
+1 2
+2 3
+3 6
+4 5
+5 4
+6 7
+7 6
+8 8
+9 10
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_b)-----
+
+----------------------------------------
+----------------------------------------
+Calling program on  ./instances/tree1.dimacs
+Number of Nodes: 7
+Number of Edges: 6
+edge_vector:
+[  [  0,   1],   [  1,   2],   [  1,   3],   [  3,   5],   [  4,   5],   [  5,   6]]
+vertex_vector:
+[  1,  -1,   3,  -1,   5,  -1,   7]
+fixed_vertices_bool:
+[  1,   0,   1,   0,   1,   0,   1]
+
+BEGIN -----(a)-----
+result_a:
+[  1, 2.63374,   3, 3.96708,   5, 5.32236,   7]
+linear_length_a: 6.68861
+quadratic_length_a: 9.33622
+Positions g of the circuits C for (a):
+1 2.63374
+3 3.96708
+5 5.32236
+END -----(a)-----
+
+
+BEGIN -----(b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 12 rows and 25 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 9, opt = 6.000000
+starting ILLsimplex on MSSlp...
+Problem has 12 rows and 25 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 6.000000
+result_b:
+[  1,   3,   3,   5,   5,   5,   7]
+linear_length_b: 6
+quadratic_length_b: 12
+Positions g of the circuits C for (b):
+1 3
+3 5
+5 5
+END -----(b)-----
+
+
+BEGIN -----(c_a)-----
+result_c_a:
+[  1,   2,   3,   4,   5,   6,   7]
+linear_length_c_a: 8
+quadratic_length_c_a: 12
+Positions g of the circuits C for (c_a):
+0 1
+1 2
+2 3
+3 4
+4 5
+5 6
+6 7
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_a)-----
+
+
+BEGIN -----(c_b)-----
+starting ILLsimplex on scaled_lp...
+Problem has 12 rows and 25 cols
+starting dual phase II
+(0): dual objval = 0.000000
+completed ILLsimplex
+scaled_lp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 9, opt = 6.000000
+starting ILLsimplex on MSSlp...
+Problem has 12 rows and 25 cols
+completed ILLsimplex
+MSSlp: time = 0.000, pI = 0, pII = 0, dI = 0, dII = 0, opt = 6.000000
+result_c_b:
+[  1,   2,   3,   4,   5,   6,   7]
+linear_length_c_b: 8
+quadratic_length_c_b: 12
+Positions g of the circuits C for (c_b):
+0 1
+1 2
+2 3
+3 4
+4 5
+5 6
+6 7
+Sorry, injectivity does not work yet, one would have to pass a list of all used positions or something similar
+END -----(c_b)-----
+
+----------------------------------------
