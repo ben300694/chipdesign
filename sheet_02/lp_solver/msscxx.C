@@ -80,6 +80,16 @@ std::vector<double> positions_with_lp(const std::vector<int> &vertex_vector,
                                       const std::vector<bool> &fixed_vertices_bool,
                                       const std::vector <Edge> &edge_vector);
 
+bool are_all_vertices_fixed(const std::vector<bool>&);
+
+std::vector<double> unassigned_positions(const std::vector<double>&, const std::vector<bool>&);
+
+std::vector<int> available_positions(const std::vector<int>&, const std::vector<bool>&, int, int);
+
+std::vector<int> exercise_c_with_a(const std::vector<int>&, const std::vector<bool>&, const std::vector<std::vector<int> >&, int, int);
+
+std::vector<int> exercise_c_with_b(const std::vector<int>&, const std::vector<bool>&, const std::vector<std::vector<int> >&, int, int);
+
 /*Overloading the '<<' operator to print vectors*/
 template<typename T>
 std::ostream &operator<<(std::ostream &out, const std::vector <T> &v) {
