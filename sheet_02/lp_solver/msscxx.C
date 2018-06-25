@@ -265,7 +265,12 @@ double average_position_of_neighbours(const std::vector<double> &vertex_vector,
                                       const size_t vertex_index,
                                       const std::vector <std::vector<size_t>> &neighbors_vector) {
     double sum = 0;
-    assert(neighbors_vector[vertex_index].size() >= 1);
+    // assert(neighbors_vector[vertex_index].size() >= 1);
+    if(neighbors_vector[vertex_index].size() == 0){
+        std::cout << "Vertex does not have neighbors" << std::endl;
+        return vertex_vector[vertex_index];
+    }
+
     assert(vertex_index < vertex_vector.size());
     for (auto index : neighbors_vector[vertex_index]) {
         sum += vertex_vector[index];
@@ -494,17 +499,18 @@ std::vector<double> unassigned_positions(const std::vector<double> &vertex_vecto
 
 std::vector<int> available_positions(const std::vector<int> &vertex_vector,
                                      const std::vector<bool> &fixed_vertices_bool) {
-    std::vector<bool> available_index(fixed_vertices_bool.size(), true);
+    std::vector<bool> is_position_available(fixed_vertices_bool.size(), true);
     for (size_t i = 0; i < fixed_vertices_bool.size(); i++) {
         if (fixed_vertices_bool[i] == true) {
-            available_index[vertex_vector[i] - 1] = false;
+            is_position_available[i] = false;
         }
     }
+    std::cout << "is_position_available: " << is_position_available << std::endl;
 
     std::vector<int> available_positions;
-    for (size_t i = 0; i < available_index.size(); i++) {
-        if (available_index[i] == true) {
-            available_positions.push_back(i + 1);
+    for (size_t i = 0; i < is_position_available.size(); i++) {
+        if (is_position_available[i] == true) {
+            available_positions.push_back(i + vertex_vector[0] - 1);
         }
     }
 
@@ -515,10 +521,15 @@ std::vector<int> exercise_c_with_a(const std::vector<int> &vertex_vector,
                                    const std::vector<bool> &fixed_vertices_bool,
                                    const std::vector <Edge> &edge_vector) {
     if (are_all_vertices_fixed(fixed_vertices_bool) == true) {
+        std::cout << "Returning because fixed_vertices_bool: " << fixed_vertices_bool << std::endl;
         return vertex_vector;
     }
 
     // Obtain some g which is not necessarily injective and integral
+    std::cout << "*** Calling iterate_average_position_of_neighbours with" << std::endl;
+    std::cout << "vertex_vector:" << vertex_vector << std::endl;
+    std::cout << "fixed_vertices_bool:" << fixed_vertices_bool << std::endl;
+    std::cout << "edge_vector:" << edge_vector << std::endl;
     std::vector<double> noninjective_fractional_solution = iterate_average_position_of_neighbours(vertex_vector,
                                                                                                   fixed_vertices_bool,
                                                                                                   edge_vector);
@@ -553,7 +564,106 @@ std::vector<int> exercise_c_with_a(const std::vector<int> &vertex_vector,
 
     std::cout << "vertex_vector_new: " << vertex_vector_new << std::endl;
 
-    return available_pos; //TODO
+
+    // Make and solve subproblems
+
+    // LEFT
+    std::vector<int> vertex_vector_left;
+    std::vector<bool> fixed_vertices_bool_left;
+    std::vector<Edge> edge_vector_left;
+    std::vector<size_t> indices_left;
+    std::vector<bool> already_assigned_to_a_side(noninjective_fractional_solution.size(), false);
+
+    size_t count = 1;
+    for(size_t i = 0; i < vertex_vector_new.size(); i++){
+        if((int) count >= median_available_position) break;
+        if(noninjective_fractional_solution[i] < median_available_position){
+            vertex_vector_left.push_back((int) noninjective_fractional_solution[i]);
+            fixed_vertices_bool_left.push_back(fixed_vertices_bool[i]);
+            indices_left.push_back(i);
+            already_assigned_to_a_side[i] = true;
+            count++;
+        }
+    }
+    vertex_vector_left.push_back(median_available_position);
+    fixed_vertices_bool_left.push_back(true);
+
+    // edges
+    for(auto edge : edge_vector){
+        if(edge[0] < (int) vertex_vector_left.size() && edge[1] < (int) vertex_vector_left.size()){
+            edge_vector_left.push_back(edge);
+            continue;
+        }
+        if(edge[0] < (int) vertex_vector_left.size() - 1 && edge[1] >= (int) vertex_vector_left.size()){
+            edge[1] = vertex_vector_left.size() - 1;
+            edge_vector_left.push_back(edge);
+        }
+    }
+    std::cout << "vertex_vector_left: " << vertex_vector_left << std::endl;
+    std::cout << "fixed_vertices_bool_left: " << fixed_vertices_bool_left << std::endl;
+    std::cout << "edge_vector_left: " << edge_vector_left << std::endl;
+    std::cout << "indices_left: " << indices_left << std::endl;
+
+    // RIGHT
+    std::vector<int> vertex_vector_right;
+    std::vector<bool> fixed_vertices_bool_right;
+    std::vector<Edge> edge_vector_right;
+    std::vector<size_t> indices_right;
+
+
+    vertex_vector_right.push_back(median_available_position);
+    fixed_vertices_bool_right.push_back(true);
+
+    count = 1;
+    for(size_t i = 0; i < vertex_vector_new.size(); i++){
+        if(already_assigned_to_a_side[i]) continue;
+        if(noninjective_fractional_solution[i] > median_available_position){
+            vertex_vector_right.push_back((int) noninjective_fractional_solution[i]);
+            fixed_vertices_bool_right.push_back(fixed_vertices_bool[i]);
+            indices_right.push_back(i);
+            count++;
+        }
+    }
+
+    for(auto edge : edge_vector){
+        if(edge[0] >= (int) vertex_vector_left.size() && edge[1] >= (int) vertex_vector_left.size()){
+            edge[0] = edge[0] - vertex_vector_left.size() + 1;
+            edge[1] = edge[1] - vertex_vector_left.size() + 1;
+            edge_vector_right.push_back(edge);
+            continue;
+        }
+        if(edge[0] <= (int) vertex_vector_left.size() && edge[1] >= (int) vertex_vector_left.size()){
+            edge[0] = 0;
+            edge[1] = edge[1] - vertex_vector_left.size() + 1;
+            edge_vector_right.push_back(edge);
+        }
+    }
+    std::cout << "vertex_vector_right: " << vertex_vector_right << std::endl;
+    std::cout << "fixed_vertices_bool_right: " << fixed_vertices_bool_right << std::endl;
+    std::cout << "### edge_vector_right: " << edge_vector_right << std::endl;
+    std::cout << "indices_right: " << indices_right << std::endl;
+
+    std::vector<int> solution_left = exercise_c_with_a(vertex_vector_left, fixed_vertices_bool_left, edge_vector_left);
+    std::vector<int> solution_right = exercise_c_with_a(vertex_vector_right, fixed_vertices_bool_right, edge_vector_right);
+    std::cout << "solution_left: " << solution_left << std::endl;
+    std::cout << "solution_right: " << solution_right << std::endl;
+
+    std::vector<int> solution(vertex_vector.size());
+    std::cout << "solution_initialized: " << solution << std::endl;
+    std::cout << "indices_left: " << indices_left << std::endl;
+    std::cout << "indices_right: " << indices_right << std::endl;
+    for(size_t i = 0; i < solution_left.size() - 1; i++){
+        solution[indices_left[i]] = solution_left[i];
+    }
+    solution[indices_left.size()] = median_available_position;
+    // Skip first element of the right solution (this is the median which was already included in left solution)
+    for(size_t i = 0; i < solution_right.size() - 1; i++){
+        solution[indices_right[i]] = solution_right[i+1];
+    }
+
+    std::cout << "solution: " << solution << std::endl;
+
+    return solution; //TODO
 }
 
 int main(int argc, char **argv) {
